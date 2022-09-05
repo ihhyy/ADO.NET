@@ -1,7 +1,6 @@
 ﻿using DAL.Models;
 using DAL.Interfaces;
 using Microsoft.Data.SqlClient;
-using System.Data;
 using DAL.Repository;
 
 namespace ADONET
