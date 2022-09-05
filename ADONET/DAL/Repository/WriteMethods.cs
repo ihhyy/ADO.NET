@@ -9,26 +9,14 @@ namespace DAL.Repository
         public async Task AddListOfGoods(SqlConnection connection, List<GoodModel> goods)
         {
             SqlCommand cmd = new();
-            string commandText = "INSERT INTO Goods (GoodName, GoodType, Quantity, Price) VALUES";
 
             for (int i = 0; i < goods.Count; i++)
             {
-                if (!(i == goods.Count - 1))
-                {
-                    commandText += WriteComponentsToAddDataComand(goods[i]) + $", ";
-                }
-                else
-                {
-                    commandText += WriteComponentsToAddDataComand(goods[i]);
-                }
+                cmd = AddParameter(connection, goods[i]);
+                cmd.Connection = connection;
+                await cmd.ExecuteNonQueryAsync();
             }
-
-            cmd.CommandText = commandText;
-            cmd.Connection = connection;
-            await cmd.ExecuteNonQueryAsync();
         }
-
-
 
         public async Task DeleteData(SqlConnection connection, int Id)
         {
@@ -42,9 +30,8 @@ namespace DAL.Repository
 
         public async Task UpdateData(SqlConnection connection, int Id, GoodModel good)
         {
-            SqlCommand cmd = new();
-            string commandText = $"UPDATE Goods SET {WriteComponentsToUpdateDataComand(good)} WHERE Id='{Id}'";
-            cmd.CommandText = commandText;
+            SqlCommand cmd = AddParameter(connection, good);
+            cmd.CommandText  = $"UPDATE Goods SET GoodName=@GoodName, GoodType=@GoodType, Quantity=@Quantity, Price=@Price WHERE Id='{Id}'";
             cmd.Connection = connection;
 
             await cmd.ExecuteNonQueryAsync();
@@ -52,30 +39,60 @@ namespace DAL.Repository
 
         public async Task AddGood(SqlConnection connection, GoodModel good)
         {
-            SqlCommand cmd = new();
-            string commandText = $"INSERT INTO Goods (GoodName, GoodType, Quantity, Price) " +
-                $"VALUES('{good.GoodName}', '{good.GoodType}', '{good.Quantity}', '{good.Price}')";
-            cmd.CommandText = commandText;
+            SqlCommand cmd = AddParameter(connection, good);
             cmd.Connection = connection;
 
             await cmd.ExecuteNonQueryAsync();
         }
 
-        private static string WriteComponentsToAddDataComand(GoodModel good)
+        private static SqlCommand AddParameter(SqlConnection connection, GoodModel good)
         {
-            string comand = $"('{good.GoodName}', '{good.GoodType}', '{good.Quantity}', '{good.Price}')";
+            string commandText = $"INSERT INTO Goods (GoodName, GoodType, Quantity, Price) " +
+                $"VALUES(@GoodName, @GoodType, @Quantity, @Price)";
 
-            return comand;
-        }
+            SqlCommand cmd = new(commandText, connection);
 
-        private static string WriteComponentsToUpdateDataComand(GoodModel good)
-        {
-            string comand = $"GoodName='{good.GoodName}'," +
-                $" GoodType='{good.GoodType}', " +
-                $"Quantity='{good.Quantity}'," +
-                $"Price='{good.Price}'";
+            SqlParameter parameter = new()
+            {
+                ParameterName = "@GoodName",
+                Value = good.GoodName,
+                SqlDbType = System.Data.SqlDbType.Char,
+                Size = good.GoodName.Length
+            }; 
+                
+            cmd.Parameters.Add(parameter);
+                
+            parameter = new()
+            {
+                ParameterName = "@GoodType",
+                Value = good.GoodType,
+                SqlDbType = System.Data.SqlDbType.Int,
+                Size = 2
+            };
 
-            return comand;
+            cmd.Parameters.Add(parameter);
+
+            parameter = new()
+            {
+                ParameterName = "@Quantity",
+                Value = good.Quantity,
+                SqlDbType = System.Data.SqlDbType.Int,
+                Size = 4
+            };
+
+            cmd.Parameters.Add(parameter);
+
+            parameter = new()
+            {
+                ParameterName = "@Price",
+                Value = good.Price,
+                SqlDbType = System.Data.SqlDbType.Int,
+                Size = 6
+            };
+
+            cmd.Parameters.Add(parameter);
+
+            return cmd;
         }
     }
 }

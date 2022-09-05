@@ -61,7 +61,7 @@ namespace ADONET
                     await connection.OpenAsync();
                     //await write.AddGood(connection, goodModels[0]);
                     //await write.AddListOfGoods(connection, goodModels);
-                    //await write.UpdateData(connection, 1, goodModels[2]);
+                    //await write.UpdateData(connection, 30, editData);
                     //await write.DeleteData(connection, 1);
 
                     //await read.GetAllGoodsAsync(connection);
