@@ -1,6 +1,7 @@
 ﻿using DAL.Models;
+using DAL.Interfaces;
 using Microsoft.Data.SqlClient;
-using System.Data;
+using DAL.Repository;
 
 namespace ADONET
 {   
@@ -30,23 +31,40 @@ namespace ADONET
                 
                 new GoodModel()
                 {
-                    GoodName = "EDIT",
-                    GoodType = 2222,
-                    Quantity = 3333,
-                    Price = 4444
+                    GoodName = "testName3",
+                    GoodType = 3,
+                    Quantity = 35,
+                    Price = 43
                 }
             };
+
+            GoodModel editData = new()
+            {
+                GoodName = "EDIT",
+                GoodType = 2222,
+                Quantity = 3333,
+                Price = 4444
+            };
+
+            IReadMethodsRepository read = new ReadMethods();
+            IControlMethodsRepository control = new ControlMethods();
+            IWriteMethodsRepository write = new WriteMethods();
+
+            //await control.CreateDataBase();
+            //await control.CreateTable();
 
             using (SqlConnection connection = new(connectionString))
             {
                 try
                 {
                     await connection.OpenAsync();
-                    //await CreateDataBase(connection);
-                    //await CreateTable(connection);
-                    //await AddData(connection, goodModels);
-                    //await UpdateData(connection, 1, goodModels[2]);
-                    await DeleteData(connection, 1);
+                    //await write.AddGood(connection, goodModels[0]);
+                    //await write.AddListOfGoods(connection, goodModels);
+                    //await write.UpdateData(connection, 30, editData);
+                    //await write.DeleteData(connection, 1);
+
+                    //await read.GetAllGoodsAsync(connection);
+                    //await read.GetGoodByIdAsync(connection, 2);
                     Console.WriteLine("sucess");
                 }
                 catch (SqlException ex)
@@ -54,84 +72,6 @@ namespace ADONET
                     Console.WriteLine($"Error message: {ex.Message}");
                 }
             }
-        }
-
-        public static async Task CreateDataBase(SqlConnection connection)
-        {
-            SqlCommand cmd = new();
-            cmd.CommandText = "CREATE DATABASE adonetdb";
-            cmd.Connection = connection;
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public static async Task CreateTable(SqlConnection connection)
-        {
-            SqlCommand cmd = new();
-            cmd.CommandText = "CREATE TABLE Goods(Id INT PRIMARY KEY IDENTITY, GoodName NVARCHAR(50) NOT NULL, GoodType INT NOT NULL, Quantity INT, Price INT NOT NULL)";
-            cmd.Connection = connection;
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public static async Task AddData(SqlConnection connection, List<GoodModel> goods)
-        {
-            SqlCommand cmd = new();
-            string commandText = "INSERT INTO Goods (GoodName, GoodType, Quantity, Price) VALUES";
-
-            for(int i = 0; i < goods.Count; i++)
-            {
-                if(!(i == goods.Count - 1))
-                {
-                    commandText += WriteComponentsToAddDataComand(goods[i]) + $", ";
-                }
-                else
-                {
-                    commandText += WriteComponentsToAddDataComand(goods[i]);
-                }
-            }
-
-            cmd.CommandText = commandText;
-            cmd.Connection = connection;
-            await cmd.ExecuteNonQueryAsync();
-
-        }
-
-        public static async Task UpdateData(SqlConnection connection, int Id, GoodModel good)
-        {
-            SqlCommand cmd = new();
-            string commandText = $"UPDATE Goods SET {WriteComponentsToUpdateDataComand(good)} WHERE Id='{Id}'";
-            cmd.CommandText = commandText;
-            cmd.Connection = connection;
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        public static async Task DeleteData(SqlConnection connection, int Id)
-        {
-            SqlCommand cmd = new();
-            string commandText = $"DELETE FROM Goods WHERE Id='{Id}'";
-            cmd.CommandText = commandText;
-            cmd.Connection = connection;
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-
-        private static string WriteComponentsToAddDataComand(GoodModel good)
-        {
-            string comand = $"('{good.GoodName}', '{good.GoodType}', '{good.Quantity}', '{good.Price}')";
-
-            return comand;
-        }
-
-        private static string WriteComponentsToUpdateDataComand(GoodModel good)
-        {
-            string comand = $"GoodName='{good.GoodName}'," +
-                $" GoodType='{good.GoodType}', " +
-                $"Quantity='{good.Quantity}'," +
-                $"Price='{good.Price}'";
-
-            return comand;
         }
     }
 }
